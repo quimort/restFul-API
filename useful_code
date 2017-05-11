@@ -1,0 +1,22 @@
+require_once 'models/Game.php';
+...
+
+$app->post('/games', function () use ($app) { 
+	
+  $game = new Game();
+
+  $game->setTitle($app->request()->post('title'));
+
+  $game->save();
+
+  $id = $game->getId();
+
+  $app->redirect("/games/{$id}");
+
+});
+...
+$app->get('/games/:id', function ($id) {
+  // Retrieve game associated with an ID of $id
+});
+
+--
