@@ -35,19 +35,38 @@ class ConexionBD
     function insertuser($name,$password,$email){
         $con=$this->connect();
         $respuesta=array();
-        $validacionnombre=$this->validator($name);
+        $validacionnombre=$this->validarnombre($name);
         $validacionemail=$this->validaremail($email);
         if($validacionnombre==0 && $validacionemail==0){
             $api_key=$this->generateApiKey();
             $password=$this->cryptpass($password);
             $query=" INSERT INTO users (`name`,`email`,`password_hash`,`api_key`) VALUES('".$name."','".$email."','".$password."','".$api_key."') ";
             $resultado=mysqli_query($con,$query);
-            $respuesta=$resultado;
+            $respuesta[0]=$resultado;
         }
-        if($validacionnombre!==0){
-            $respuesta=""
+        if($validacionnombre!=0){
+            $respuesta[1]=" name already exist";
+        }
+        if($validacionemail!=0){
+            $respuesta[2]=" email already exist";
         }
         $this->close($con);
+        return $respuesta;
+    }
+    function loginuser($name,$password){
+        $con=$this->connect();
+        $respuesta="";
+        $password=$this->cryptpass($password);
+        $query="SELECT * FROM users WHERE password_hash='".$password."' AND(name='".$name."' OR email='".$name."')";
+        mysqli_query($con,$query);
+        $numrows=mysqli_affected_rows($con);
+        $this->close($con);
+        if($numrows==1){
+            $respuesta="secces";
+        }
+        else{
+            $respuesta="user not find";
+        }
         return $respuesta;
     }
     function validarnombre($name){
@@ -62,7 +81,7 @@ class ConexionBD
         $connectio=$this->connect();
         $query="SELECT * FROM users WHERE email='".$email."'";
         mysqli_query($connectio,$query);
-        $resultrows=mysqli_num_rows($connectio);
+        $resultrows=mysqli_affected_rows($connectio);
         $this->close($connectio);
         return $resultrows;
     }

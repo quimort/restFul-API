@@ -29,6 +29,14 @@ $app->post('/register',function () use($app){
         $result = $connection->insertuser($name,$password,$email);
         echo json_encode($result);
 });
+$app->post('/login',function () use($app){
+    $app->response()->header("Content-Type", "application/json");
+    $name=$app->request()->post('name');
+    $password=$app->request()->post('password');
+    $conn=new ConexionBD();
+    $result = $conn->loginuser($name,$password);
+    echo json_encode($result);
+});
 $app->run();
 
 ?>
