@@ -34,21 +34,14 @@ class ConexionBD
     }
     function insertuser($name,$password,$email){
         $con=$this->connect();
-        $respuesta=array();
-        $validacionnombre=$this->validarnombre($name);
-        $validacionemail=$this->validaremail($email);
-        if($validacionnombre==0 && $validacionemail==0){
             $api_key=$this->generateApiKey();
             $password=$this->cryptpass($password);
             $query=" INSERT INTO users (`name`,`email`,`password_hash`,`api_key`) VALUES('".$name."','".$email."','".$password."','".$api_key."') ";
             $resultado=mysqli_query($con,$query);
-            $respuesta[0]=$resultado;
-        }
-        if($validacionnombre!=0){
-            $respuesta[1]=" name already exist";
-        }
-        if($validacionemail!=0){
-            $respuesta[2]=" email already exist";
+        if($resultado){
+            $respuesta=$api_key;
+        }else{
+            $respuesta="not inserted";
         }
         $this->close($con);
         return $respuesta;
@@ -62,12 +55,19 @@ class ConexionBD
         $numrows=mysqli_affected_rows($con);
         $this->close($con);
         if($numrows==1){
-            $respuesta="secces";
+            $respuesta=true;
         }
         else{
-            $respuesta="user not find";
+            $respuesta=false;
         }
         return $respuesta;
+    }
+    function insertviafacebook($id,$token){
+        $con=$this->connect();
+        $query="INSERT INTO `users`(`name`,`email`,`password_hash`,`api_key`)VALUES('".$id."','','','".$token."')";
+        $result = $this->query($query);
+        $this->close($con);
+        return $result;
     }
     function validarnombre($name){
         $connectio=$this->connect();

@@ -21,21 +21,49 @@ $app->get('/list', function () {
 });
 
 $app->post('/register',function () use($app){
-        $app->response()->header("Content-Type", "application/json");
-        $name = $app->request()->post('name');
         $connection = new ConexionBD();
-        $email = $app->request()->post('email');
-        $password = $app->request()->post('password');
-        $result = $connection->insertuser($name,$password,$email);
-        echo json_encode($result);
+        $app->response()->header("Content-Type", "application/json");
+        $json=$app->request()->getBody();
+        $data = json_decode($json, true);
+        $name = $data['name'];
+        $email = $data['email'];
+        $password = $data['Password'];
+        $to_post=array("respuesta"=>array());
+        $result="";
+        if($connection->validarnombre($name)!=0){
+            $to_post["respuesta"]["name"]="name already exist";
+        }
+        if($connection->validaremail($email)!=0){
+                $to_post["respuesta"]["mail"]="email already exist";
+            }
+        else{
+                $result = $connection->insertuser($name,$password,$email);
+                $to_post["respuesta"]["apiyek"]=$result;
+        }
+
+        echo json_encode($to_post);
+});
+$app->post('/resface',function ()use($app){
+    $connection = new ConexionBD();
+    $app->response()->header("Content-Type", "application/json");
+    $json=$app->request()->getBody();
+    $data = json_decode($json, true);
+    $id=$data['ID'];
+    $token=$data['Token'];
+    $result=$connection->insertviafacebook($id,$token);
+    $to_result = array("result"=>$result);
+    echo json_encode($to_result);
 });
 $app->post('/login',function () use($app){
     $app->response()->header("Content-Type", "application/json");
-    $name=$app->request()->post('name');
-    $password=$app->request()->post('password');
+    $json=$app->request()->getBody();
+    $data = json_decode($json, true);
+    $name=$data['name'];
+    $password=$data['password'];
     $conn=new ConexionBD();
     $result = $conn->loginuser($name,$password);
-    echo json_encode($result);
+    $to_result=array("respuesta"=>$result);
+    echo json_encode($to_result);
 });
 $app->run();
 
